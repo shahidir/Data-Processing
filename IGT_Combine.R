@@ -3,14 +3,44 @@ library(foreign)
 
 
 #setwd( "~/Desktop/Impulsivity" ) #Sets working directory to folder where SPSS file is
-logData <- read.spss("R01 IMPULSIIVITY DATABASE 4-24-2019.sav",to.data.frame=TRUE,
-                     use.value.labels=FALSE) #Imports SPSS file
-setwd( "C:/Users/shahidir/Dropbox/Research/Data Processing/Raw Data" ) #Sets working directory to folder where the raw data is
+#logData <- read.spss("R01 IMPULSIIVITY DATABASE 4-24-2019.sav",to.data.frame=TRUE, use.value.labels=FALSE) #This is if there is a master database, all code relating to master database highlighted out
+
+
+
+# Changing IQDAT to txt files in same format ------------------------------
+setwd( "C:/Users/shahidir/Dropbox/Research/Data Processing/Raw Data/IGT Inquisit" ) #Sets working directory to folder where the IQDAT files are
+allFiles = dir() #Gets directory of the raw files
+numSubjs = length( allFiles )
+for (subjIdx in 1:numSubjs) {
+  tmpFile = allFiles[ subjIdx ]
+  tmp= read.table(tmpFile, header=T, colClasses=c(date="character", subject="character")) #Imports data, keeps values in date and subject as character
+  df<-tmp[,c("values.cardsselected", "response", "values.gain", "values.loss", "values.currenttotal", "latency", "subject", "date")] #Gets columns of interest
+  df$date<-sub("\\s+$", "", gsub('(.{2})', '\\1-', df$date)) #Places spaces every two characters in date column
+  df$date<-substr(df$date,1,nchar(df$date)-1) #Removes trailing dash
+  colnames(df)[which(names(df) == "values.cardsselected")] <- "Trial" #Renames columns to match output of raw IGT data
+  colnames(df)[which(names(df) == "response")] <- "Deck"
+  colnames(df)[which(names(df) == "values.gain")] <- "Win"
+  colnames(df)[which(names(df) == "values.loss")] <- "Lose"
+  colnames(df)[which(names(df) == "values.currenttotal")] <- "Score"
+  colnames(df)[which(names(df) == "latency")] <- "Time(ms)"
+  
+  subjIDCol<-which(colnames(df)=="subject") #Creates new name for file to match other CARI naming conventions
+  dateCol<-which(colnames(df)=="date")
+  subjectID<-df[1,subjIDCol]
+  date<-df[1,dateCol]
+  outputName<-paste("IGT", subjectID, date, sep="_")
+  write.table( df, paste(outputName, ".txt", sep=""),row.names=F, col.names=T, sep = "\t", quote=FALSE) #Saves the processed file, need to move all of these files to a folder with other IGT data
+}
 
 
 
 
 
+
+
+
+
+# Combining all IGT data --------------------------------------------------
 groupInfo = logData 
 allFiles = dir()
 numSubjs = length( allFiles )
