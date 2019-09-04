@@ -123,4 +123,4 @@ for (subjIdx in 1:numSubjs) {
 }
 
 #Preparing output for all data
-write.table( allData, "allData.txt",row.names=F, col.names=T, sep = "\t", quote=FALSE  )
+write.table( allData, "IGT_Combined.txt",row.names=F, col.names=T, sep = "\t", quote=FALSE  )
