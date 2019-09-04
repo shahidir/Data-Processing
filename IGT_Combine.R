@@ -67,6 +67,7 @@ importFunction1<-function(df){ #This function describes what to do if the IGT fi
   df$Deck = gsub("B'", 2, df$Deck)
   df$Deck = gsub("C'", 3, df$Deck)
   df$Deck = gsub("D'", 4, df$Deck)
+  df$Origin = "Old_IGT"
   
   
   return(df)
@@ -78,6 +79,7 @@ importFunction2<-function(df){
   df$Deck = gsub("deck2", 2, df$Deck)
   df$Deck = gsub("deck3", 3, df$Deck)
   df$Deck = gsub("deck4", 4, df$Deck)
+  df$Origin = "IQDAT_IGT"
   return(df)
 }
 
@@ -88,7 +90,7 @@ allData = NULL #Dataset where all merged IGT data will be placed
 allFiles = dir() #Gets directory of all files
 numSubjs = length( allFiles )
 for (subjIdx in 1:numSubjs) {
-  #subjIdx=326
+  #subjIdx=1
   tmpFile = allFiles[ subjIdx ]
   message(tmpFile)
   tmp= read.table(tmpFile, skip=21, header=T) #Imports file assuming IGT description is in place
