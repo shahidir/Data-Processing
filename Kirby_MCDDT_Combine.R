@@ -7,10 +7,11 @@ library(filesstrings)
 # Combining all Delay Discounting data --------------------------------------------------
 setwd( "C:/Users/shahidir/Dropbox/Research/Data Processing/Raw Data/Kirby" ) #Sets working directory to folder where the IQDAT files are
 allCombined = NULL #Dataset where the files containing ALL will be placed
+transposedData = NULL #Dataset containing values to be transposed
 allFiles = dir() #Gets directory of all files
 numSubjs = length( allFiles )
 for (subjIdx in 1:numSubjs) {
-#  subjIdx=1
+  #subjIdx=1
   tmpFile = allFiles[ subjIdx ]
   df= read.table(tmpFile, skip=13, sep=",", header = F) #Imports file assuming IGT description is in place
   
@@ -33,9 +34,16 @@ for (subjIdx in 1:numSubjs) {
     next
   }
   df$date <-date
-  
+  temp<-df$V6 #Moves choice_raw to temp dataset
+  temp<-t(temp) #Transposes that data
+  temp<-as.data.frame(temp) #Converts to data frame
+  tempColNames<-colnames(temp) #Gets colnames for later sorting
+  temp$subject <- df[1,c("V1")] #Creates a subject column by getting subject id from df
+  temp$date <- date #Creates a subject column by getting subject id from df
+  temp<-temp[,c("subject","date", tempColNames)] #Orders column ID to place subject first
   #Completes the merging of the files
   allCombined = rbind(allCombined, df) 
+  transposedData = rbind(transposedData, temp)
 }
 
 colnames(allCombined)[which(names(allCombined) == "V1")] <- "subject_id" 
@@ -46,6 +54,13 @@ colnames(allCombined)[which(names(allCombined) == "V5")] <- "rt"
 colnames(allCombined)[which(names(allCombined) == "V6")] <- "choice_raw" 
 colnames(allCombined)[which(names(allCombined) == "V7")] <- "choice_label" 
 
-
+#Renames all columns to match the prior CARI output
+for(i in 3:ncol(transposedData)){
+  #i=2
+  tempName<-colnames(transposedData)[i]
+  tempName<-str_replace_all(tempName, fixed("V"), "c")
+  colnames(transposedData)[i]<-tempName
+}
 #Outputing all data
 write.table( allCombined, "Kirby_Combined.txt",row.names=F, col.names=T, sep = "\t", quote=FALSE  )
+write.table( transposedData, "Kirby_Transposed.txt",row.names=F, col.names=T, sep = "\t", quote=FALSE  )
